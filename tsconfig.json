@@ -2,7 +2,10 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "jsx": "react-native",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "moduleResolution": "node",
     "esModuleInterop": true,
     "noEmit": true,
@@ -11,8 +14,16 @@
     "strict": true,
     "baseUrl": "./",
     "paths": {
-      "@app/*": ["./src/*", "./src/*/index"]
+      "@app/*": [
+        "./src/*",
+        "./src/*/index"
+      ]
     }
   },
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js"]
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js"
+  ],
+  "extends": "expo/tsconfig.base"
 }
