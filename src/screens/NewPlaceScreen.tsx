@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Button } from 'react-native';
 import { NavigationStackProp, NavigationStackOptions } from 'react-navigation-stack';
 
-import { Input } from '@app/components/UI';
+import { Input, ImagePicker } from '@app/components/UI';
 import { Colors } from '@app/constants';
 import { useReducer } from '@app/hooks';
 import { MainRoutes } from '@app/navigation/routes';
@@ -15,11 +15,12 @@ interface Props {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const NewPlaceScreen = ({ navigation }: Props) => {
   const [title, setTitle] = useState('');
+  const [imageUri, setImageUri] = useState<string>('');
   const { dispatch } = useReducer();
   console.log(title);
 
   const handleSavePlace = () => {
-    dispatch(addPlace({ place: { title } }));
+    dispatch(addPlace({ place: { title, imageUri } }));
     navigation.navigate(MainRoutes.Places);
   };
 
@@ -27,6 +28,7 @@ const NewPlaceScreen = ({ navigation }: Props) => {
     <ScrollView>
       <View style={styles.form}>
         <Input style={styles.input} label='Title' onChange={setTitle} />
+        <ImagePicker onImageTaken={setImageUri} />
         <Button title='save place' color={Colors.primary} onPress={handleSavePlace} />
       </View>
     </ScrollView>

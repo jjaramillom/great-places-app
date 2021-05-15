@@ -7,15 +7,14 @@ import Place from '@app/models/Place';
 
 interface Props {
   place: Place;
-  image?: string;
   onSelect: () => void;
 }
 
-const PlaceItem: React.FC<Props> = ({ place, onSelect, image }: Props) => {
+const PlaceItem: React.FC<Props> = ({ place, onSelect }: Props) => {
   return (
-    <TouchableComponent onPress={onSelect} >
+    <TouchableComponent onPress={onSelect}>
       <View style={styles.placeItem}>
-        <Image style={styles.image} source={{ uri: image }} />
+        <Image style={styles.image} source={{ uri: place.imageUri }} />
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{place.title}</Text>
           <Text style={styles.address}>{place.address}</Text>
