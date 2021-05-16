@@ -5,6 +5,9 @@ import { Provider } from 'react-redux';
 
 import Navigator from '@app/navigation';
 import store from '@app/store/store';
+import { init } from '@app/utils/db';
+
+init().catch(console.error);
 
 const fetchFonts = () =>
   Font.loadAsync({

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, Button } from 'react-native';
 import { NavigationStackProp, NavigationStackOptions } from 'react-navigation-stack';
 
-import { Input, ImagePicker } from '@app/components/UI';
+import { Input, ImagePicker, LocationPicker } from '@app/components/UI';
+import { PlaceLocation } from '@app/components/UI/LocationPicker';
 import { Colors } from '@app/constants';
 import { useReducer } from '@app/hooks';
 import { MainRoutes } from '@app/navigation/routes';
@@ -16,6 +17,7 @@ interface Props {
 const NewPlaceScreen = ({ navigation }: Props) => {
   const [title, setTitle] = useState('');
   const [imageUri, setImageUri] = useState<string>('');
+  const [location, setLocation] = useState<PlaceLocation | undefined>();
   const { dispatch } = useReducer();
   console.log(title);
 
@@ -29,6 +31,7 @@ const NewPlaceScreen = ({ navigation }: Props) => {
       <View style={styles.form}>
         <Input style={styles.input} label='Title' onChange={setTitle} />
         <ImagePicker onImageTaken={setImageUri} />
+        <LocationPicker onLocationReady={setLocation} />
         <Button title='save place' color={Colors.primary} onPress={handleSavePlace} />
       </View>
     </ScrollView>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FlatList } from 'react-native';
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import { NavigationStackProp, NavigationStackOptions } from 'react-navigation-stack';
@@ -8,6 +8,7 @@ import { HeaderButton } from '@app/components/UI';
 import { useReducer } from '@app/hooks';
 import Place from '@app/models/Place';
 import { MainRoutes } from '@app/navigation/routes';
+import { loadPlaces } from '@app/store/places';
 
 interface Props {
   navigation: NavigationStackProp<unknown>;
@@ -19,12 +20,17 @@ const renderPlace = (place: Place, onSelect: (id: string, title: string) => void
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const PlacesListScreen = ({ navigation }: Props) => {
-  const { selector } = useReducer();
+  const { selector, dispatch } = useReducer();
   const { places } = selector((state) => state.places);
 
   const handleSelection = (id: string, title: string) => {
     navigation.navigate(MainRoutes.PlaceDetail, { id, title });
   };
+
+  useEffect(() => {
+    dispatch(loadPlaces());
+  }, [dispatch]);
+
   return (
     <FlatList
       data={places}
