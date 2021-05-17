@@ -35,6 +35,7 @@ export const insertPlace = ({
   title,
   address,
   imageUri,
+  coordinates,
 }: Omit<Place, 'id'>): Promise<string> => {
   return new Promise((resolve, reject) => {
     db.transaction((transaction) => {
@@ -42,7 +43,13 @@ export const insertPlace = ({
         `INSERT INTO
         place (title, imageUri, address, lat, lng )
         VALUES (?, ?, ?, ?, ?);`,
-        [title, imageUri, address ?? 'temp', 1, 1],
+        [
+          title,
+          imageUri,
+          address ?? '',
+          coordinates?.latitude ?? 0,
+          coordinates?.longitude ?? 0,
+        ],
         (_, result) => {
           resolve(result.insertId.toString());
         },
@@ -55,7 +62,7 @@ export const insertPlace = ({
   });
 };
 
-export const getPlaces = (): Promise<Place[]> => {
+export const getAllPlaces = (): Promise<Place[]> => {
   return new Promise((resolve, reject) => {
     db.transaction((transaction) => {
       transaction.executeSql(
@@ -69,6 +76,24 @@ export const getPlaces = (): Promise<Place[]> => {
               id: place.id.toString(), // id from the database comes as a number
             })) ?? []
           );
+        },
+        (_, err) => {
+          reject(err);
+          return false;
+        }
+      );
+    });
+  });
+};
+
+export const deleteAllPlaces = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    db.transaction((transaction) => {
+      transaction.executeSql(
+        'DELETE FROM place;',
+        [],
+        (_, result) => {
+          resolve();
         },
         (_, err) => {
           reject(err);

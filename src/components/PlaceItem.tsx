@@ -14,7 +14,15 @@ const PlaceItem: React.FC<Props> = ({ place, onSelect }: Props) => {
   return (
     <TouchableComponent onPress={onSelect}>
       <View style={styles.placeItem}>
-        <Image style={styles.image} source={{ uri: place.imageUri }} />
+        <Image
+          style={styles.image}
+          source={{
+            uri:
+              place.imageUri && place.imageUri !== ''
+                ? place.imageUri
+                : 'https://image.arrivalguides.com/415x300/03/3a44251a00b228e2467d2f82582365bf.jpg',
+          }}
+        />
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{place.title}</Text>
           <Text style={styles.address}>{place.address}</Text>

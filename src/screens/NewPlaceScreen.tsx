@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Button } from 'react-native';
+import { LatLng } from 'react-native-maps';
 import { NavigationStackProp, NavigationStackOptions } from 'react-navigation-stack';
 
 import { Input, ImagePicker, LocationPicker } from '@app/components/UI';
-import { PlaceLocation } from '@app/components/UI/LocationPicker';
 import { Colors } from '@app/constants';
 import { useReducer } from '@app/hooks';
 import { MainRoutes } from '@app/navigation/routes';
@@ -17,22 +17,42 @@ interface Props {
 const NewPlaceScreen = ({ navigation }: Props) => {
   const [title, setTitle] = useState('');
   const [imageUri, setImageUri] = useState<string>('');
-  const [location, setLocation] = useState<PlaceLocation | undefined>();
+  const [location, setLocation] = useState<LatLng | undefined>();
   const { dispatch } = useReducer();
-  console.log(title);
+
+  const newPickedLocation = navigation.getParam('location');
 
   const handleSavePlace = () => {
-    dispatch(addPlace({ place: { title, imageUri } }));
+    dispatch(
+      addPlace({
+        place: {
+          title,
+          imageUri,
+          coordinates: location,
+        },
+      })
+    );
     navigation.navigate(MainRoutes.Places);
   };
+
+  useEffect(() => {
+    if (newPickedLocation) {
+      setLocation(newPickedLocation);
+    }
+  }, [newPickedLocation]);
 
   return (
     <ScrollView>
       <View style={styles.form}>
         <Input style={styles.input} label='Title' onChange={setTitle} />
         <ImagePicker onImageTaken={setImageUri} />
-        <LocationPicker onLocationReady={setLocation} />
-        <Button title='save place' color={Colors.primary} onPress={handleSavePlace} />
+        <LocationPicker initialLocation={location} onLocationPicked={setLocation} />
+        <Button
+          disabled={!title}
+          title='save place'
+          color={Colors.primary}
+          onPress={handleSavePlace}
+        />
       </View>
     </ScrollView>
   );

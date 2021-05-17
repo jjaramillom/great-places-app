@@ -1,8 +1,16 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line import/no-unresolved
+import { GOOGLE_KEY } from '@env';
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as FileSystem from 'expo-file-system';
+import { LatLng } from 'react-native-maps';
 
 import Place from '@app/models/Place';
-import { insertPlace, getPlaces } from '@app/utils/db';
+import { insertPlace, getAllPlaces } from '@app/utils/db';
+
+const getAddressUrl = ({ latitude, longitude }: LatLng) =>
+  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_KEY}`;
 
 interface State {
   places: Place[];
@@ -12,8 +20,11 @@ const initialState: State = {
   places: [],
 };
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface NewPlace extends Omit<Place, 'id'> {}
+
 interface AddPlacePayload {
-  place: Omit<Place, 'id'>;
+  place: NewPlace;
 }
 
 export const addPlace = createAsyncThunk(
@@ -31,19 +42,26 @@ export const addPlace = createAsyncThunk(
         throw new Error(error);
       }
     }
+    let address: string | undefined;
+    if (place.coordinates) {
+      const resp = await fetch(getAddressUrl(place.coordinates));
+      if (resp.ok) {
+        address = (await resp.json()).results?.[0].formatted_address;
+      }
+    }
+    const newPlace: NewPlace = { ...place, imageUri, address };
     try {
-      const placeId = await insertPlace({ ...place, imageUri });
-      return { ...place, imageUri, id: placeId };
+      const placeId = await insertPlace(newPlace);
+      return { ...newPlace, id: placeId };
     } catch (error) {
       throw new Error(error);
     }
   }
 );
 
-export const loadPlaces = createAsyncThunk(
-  'places/loadPlaces',
-  async (): Promise<Place[]> => getPlaces()
-);
+export const loadPlaces = createAsyncThunk('places/loadPlaces', async (): Promise<Place[]> => {
+  return getAllPlaces();
+});
 
 const authSlice = createSlice({
   name: 'places',

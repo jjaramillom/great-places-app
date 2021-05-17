@@ -1,17 +1,17 @@
 import * as Location from 'expo-location';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Button, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { LatLng } from 'react-native-maps';
+import { withNavigation, NavigationInjectedProps } from 'react-navigation';
 
-import { DefaultText, MapPreview } from '@app/components/UI';
+import DefaultText from '@app/components/UI/DefaultText';
+import MapPreview from '@app/components/UI/MapPreview';
 import { Colors } from '@app/constants';
+import { MainRoutes } from '@app/navigation/routes';
 
-interface Props {
-  onLocationReady: (location: PlaceLocation) => void;
-}
-
-export interface PlaceLocation {
-  latitude: number;
-  longitude: number;
+interface Props extends NavigationInjectedProps {
+  onLocationPicked: (location: LatLng) => void;
+  initialLocation?: LatLng;
 }
 
 const hasPermissions = async (): Promise<boolean> => {
@@ -26,9 +26,14 @@ const hasPermissions = async (): Promise<boolean> => {
   return result.granted;
 };
 
-const LocationPicker: React.FC<Props> = ({ onLocationReady }: Props) => {
-  const [pickedLocation, setPickedLocation] = useState<PlaceLocation | undefined>();
+const LocationPicker: React.FC<Props> = ({
+  onLocationPicked,
+  initialLocation,
+  navigation,
+}: Props) => {
+  const [pickedLocation, setPickedLocation] = useState<LatLng | undefined>(initialLocation);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+
   const handlePickLocation = async () => {
     if (!(await hasPermissions())) {
       return;
@@ -36,12 +41,12 @@ const LocationPicker: React.FC<Props> = ({ onLocationReady }: Props) => {
     try {
       setIsFetching(true);
       const location = await Location.getCurrentPositionAsync();
-      const placeLocation: PlaceLocation = {
+      const placeLocation: LatLng = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
       setPickedLocation(placeLocation);
-      onLocationReady(placeLocation);
+      onLocationPicked(placeLocation);
     } catch (error) {
       Alert.alert(
         'Could not get current location',
@@ -51,20 +56,41 @@ const LocationPicker: React.FC<Props> = ({ onLocationReady }: Props) => {
     }
     setIsFetching(false);
   };
+
+  const handlePickMapLocation = async () => {
+    navigation.navigate(MainRoutes.MapScreen, {
+      ...(pickedLocation && { initialLocation: pickedLocation }),
+    });
+  };
+
+  useEffect(() => {
+    setPickedLocation(initialLocation);
+  }, [initialLocation]);
+
   return (
     <View style={styles.locationPicker}>
-      <MapPreview location={pickedLocation} style={styles.mapPreview}>
+      <MapPreview
+        location={pickedLocation}
+        style={styles.mapPreview}
+        onPress={handlePickMapLocation}>
         {isFetching ? (
           <ActivityIndicator size='large' color={Colors.primary} />
         ) : (
           <DefaultText>No location chosen yet!</DefaultText>
         )}
       </MapPreview>
-      <Button
-        title='Get current location'
-        color={Colors.primary}
-        onPress={handlePickLocation}
-      />
+      <View style={styles.actions}>
+        <Button
+          title='Get current location'
+          color={Colors.primary}
+          onPress={handlePickLocation}
+        />
+        <Button
+          title='Pick location on map'
+          color={Colors.primary}
+          onPress={handlePickMapLocation}
+        />
+      </View>
     </View>
   );
 };
@@ -82,6 +108,11 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
 });
 
-export default LocationPicker;
+export default withNavigation(LocationPicker);
