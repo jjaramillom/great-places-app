@@ -71,10 +71,14 @@ export const getAllPlaces = (): Promise<Place[]> => {
         (_, result) => {
           resolve(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ((result.rows as any)?._array as Place[]).map((place) => ({
-              ...place,
-              id: place.id.toString(), // id from the database comes as a number
-            })) ?? []
+            ((result.rows as any)?._array).map(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (place: any): Place => ({
+                ...place,
+                coordinates: { latitude: place.lat, longitude: place.lng },
+                id: place.id.toString(), // id from the database comes as a number
+              })
+            ) ?? []
           );
         },
         (_, err) => {

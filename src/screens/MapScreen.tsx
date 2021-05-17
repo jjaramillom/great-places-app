@@ -37,8 +37,12 @@ const MapScreen = ({ navigation }: Props) => {
   const [marker, setMarker] = useState<LatLng | undefined>();
   const [initialRegion, setInitialRegion] = useState<Region | undefined>();
   const [loading, setLoading] = useState<boolean>(false);
+  const viewOnly = navigation.getParam('viewOnly');
 
   const handleSelectLocation = (event: MapEvent) => {
+    if (viewOnly) {
+      return;
+    }
     if (!marker) {
       navigation.setParams({ isSaveEnabled: true });
     }
@@ -110,22 +114,27 @@ MapScreen.navigationOptions = (navigationData: {
   navigation: NavigationStackProp<unknown>;
 }): NavigationStackOptions => {
   const saveLocation = navigationData.navigation.getParam('saveLocation');
+  const viewOnly = navigationData.navigation.getParam('viewOnly');
   const isSaveEnabled: boolean = navigationData.navigation.getParam('isSaveEnabled');
+  const title: string = navigationData.navigation.getParam('title');
+
   return {
-    headerTitle: 'Pick location',
-    // eslint-disable-next-line react/display-name
-    headerRight: () =>
-      isSaveEnabled ? (
-        <TouchableOpacity style={styles.headerButton} onPress={saveLocation}>
-          <DefaultText style={styles.headerButtonText}>Save</DefaultText>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.headerButton}>
-          <DefaultText style={[styles.headerButtonText, styles.headerButtonDisabled]}>
-            Save
-          </DefaultText>
-        </View>
-      ),
+    headerTitle: title || 'Pick location',
+    ...(!viewOnly && {
+      // eslint-disable-next-line react/display-name
+      headerRight: () =>
+        isSaveEnabled ? (
+          <TouchableOpacity style={styles.headerButton} onPress={saveLocation}>
+            <DefaultText style={styles.headerButtonText}>Save</DefaultText>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.headerButton}>
+            <DefaultText style={[styles.headerButtonText, styles.headerButtonDisabled]}>
+              Save
+            </DefaultText>
+          </View>
+        ),
+    }),
   };
 };
 

@@ -5,6 +5,7 @@ import { NavigationStackProp, NavigationStackOptions } from 'react-navigation-st
 import { DefaultText, MapPreview } from '@app/components/UI';
 import { Colors } from '@app/constants';
 import { useReducer } from '@app/hooks';
+import { MainRoutes } from '@app/navigation/routes';
 
 interface Props {
   navigation: NavigationStackProp<unknown>;
@@ -16,7 +17,14 @@ const PlaceDetailScreen = ({ navigation }: Props) => {
   const placeId = navigation.getParam('id');
 
   const place = selector((state) => state.places.places.find((p) => p.id === placeId));
-  console.log(place);
+
+  const handleMapPress = () => {
+    navigation.navigate(MainRoutes.MapScreen, {
+      initialLocation: place?.coordinates,
+      viewOnly: true,
+      title: `${place?.title} location`,
+    });
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -33,7 +41,11 @@ const PlaceDetailScreen = ({ navigation }: Props) => {
         <View style={styles.addressContainer}>
           <DefaultText style={styles.address}>{place?.address}</DefaultText>
         </View>
-        <MapPreview style={styles.mapPreview} location={place?.coordinates} />
+        <MapPreview
+          onPress={handleMapPress}
+          style={styles.mapPreview}
+          location={place?.coordinates}
+        />
       </View>
     </ScrollView>
   );
